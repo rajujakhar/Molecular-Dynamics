@@ -1,0 +1,125 @@
+#include "ParameterReader.hpp"
+
+ParameterReader::ParameterReader()
+//fill the keys_ of the Parameter
+{
+	/*ParameterReader::keys_.push_back("name");
+	ParameterReader::keys_.push_back("vis_space");
+	ParameterReader::keys_.push_back("t_start");
+	ParameterReader::keys_.push_back("t_end");
+	ParameterReader::keys_.push_back("delta_t");
+	ParameterReader::keys_.push_back("x_min");
+	ParameterReader::keys_.push_back("y_min");
+	ParameterReader::keys_.push_back("z_min");
+	ParameterReader::keys_.push_back("x_max");
+	ParameterReader::keys_.push_back("y_max");
+	ParameterReader::keys_.push_back("z_max");
+	ParameterReader::keys_.push_back("r_cut");
+	ParameterReader::keys_.push_back("epsilon");
+	ParameterReader::keys_.push_back("sigma");*/
+
+	keys_.push_back("name");
+	keys_.push_back("vis_space");
+	keys_.push_back("t_start");
+	keys_.push_back("t_end");
+	keys_.push_back("delta_t");
+	keys_.push_back("x_min");
+	keys_.push_back("y_min");
+	keys_.push_back("z_min");
+	keys_.push_back("x_max");
+	keys_.push_back("y_max");
+	keys_.push_back("z_max");
+	keys_.push_back("r_cut");
+	keys_.push_back("epsilon");
+	keys_.push_back("sigma");
+}
+
+bool ParameterReader::isDefined(const std::string &key)
+{
+    std::cout << "Size of keys_" << keys_.size() << std::endl;
+    auto iter = std::find(keys_.begin(), keys_.end(), key);
+
+    if(iter== keys_.end())
+    {	
+    	std::cout << "Key not found\n";
+        return 0;    //key not found
+    }
+    else
+        return 1;    // key found
+}
+
+void ParameterReader::readParameters(const std::string &file)
+{
+    std::string line, key, val;
+    char delim = ' ';
+    std::ifstream input_file(file);
+
+    //input_file.open(file);  //open the file for reading
+    //std::cout << "File opened\n";
+    assert(input_file.fail() == 0);
+    //std::cout << "File opened\n";
+
+    getline(input_file, line);
+    std::cout << line << std::endl;
+
+    while(getline(input_file, line))
+    {
+    	//std::cout <<"While loop\n";
+        
+        std::stringstream ss(line);              //create a string stream
+
+        getline(ss, key, delim);       // find key
+        getline(ss, val);       // find val
+
+        std::cout << "key is: " << key << std::endl;
+        std::cout << "Value is: " << val << std::endl;
+       	//std::cout << "In while\n"; 	
+        /*if(isDefined(key))
+        {
+            globalMap_.insert(std::pair<std::string, double> ("key",
+std::stod(val)));
+            std::cout << "Data inserted\n";
+        }*/
+    }
+
+    input_file.close();
+
+
+}
+
+void ParameterReader::displayMap()
+{
+    std::cout << "Displaying the contents of map\n";
+
+    for(auto iter = globalMap_.begin(); iter!=globalMap_.end(); ++iter)
+    {
+        std::cout << iter->first << "\t" << iter->second << std::endl;
+    }
+
+    std::cout << "Done Displaying\n";
+}
+
+
+
+
+void ParameterReader::setParams()
+{
+
+	std::string ParameterReader::name = "blocks";
+	size_t ParameterReader::vis_space =  1600;
+	t_start = 0.0;
+	t_end = 8.0;
+	delta_t = 0.00005;
+	x_min = 0.0;
+	y_min = 0.0;
+	z_min = 0.0;
+	x_max = 224.4924;
+	y_max = 224.4924;
+	z_max = 224.4924;
+	r_cut = 2.5;
+	epsilon = 5.0;
+	sigma = 1.0;
+
+	std::cout<<"Displaying the Params"<<std::endl;	
+	
+}

@@ -1,0 +1,35 @@
+#include<iostream>
+#include<string>
+
+//#include "ParameterReader.hpp"
+#include "ProblemFormulate.hpp"
+
+int main(int argc, char*argv[])
+{
+
+	if(argc<3)
+		std::cout<<"Unsufficient number of input parameters"<<std::endl;
+	
+	std::string paramsFileName = argv[1];
+	std::string dataFileName = argv[2];
+
+	std::cout<<"The params file is "<<paramsFileName<<std::endl;
+	std::cout<<"The data file is "<<dataFileName<<std::endl;
+
+	/*
+	ParameterReader param;
+	param.readParameters(std::string("blocks.par"));
+	param.displayMap();
+	param.setParams();
+	*/
+
+	ProblemFormulate MDsim;
+	
+	MDsim.readDataInputFile(dataFileName);
+	MDsim.simulateMD();
+	
+
+	return 0;	
+
+
+}
