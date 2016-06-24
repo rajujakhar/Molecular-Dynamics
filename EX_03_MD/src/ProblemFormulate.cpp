@@ -165,12 +165,14 @@ void ProblemFormulate::setUpLinkedCells()
 	std::cout<<"Now Setting up the Linked Cells"<<std::endl;
 
 // Now determining the values of n_i_c and r_i_c 
-	const real l1 = abs(x_max-x_min);
-	const real l2 = abs(y_max-y_min);
-	const real l3 = abs(z_max-z_min);
+	const real l1 = fabs(x_max-x_min);
+	const real l2 = fabs(y_max-y_min);
+	const real l3 = fabs(z_max-z_min);
 
 	n_1_c = l1/r_cut;	n_2_c = l2/r_cut;	n_3_c = l3/r_cut;		
 	r_1_c = l1/n_1_c;	r_2_c = l2/n_2_c;	r_3_c = l3/n_3_c;
+
+	assert(n_1_c>0);	assert(n_2_c>0);	assert(n_3_c>0);
 
 	std::cout<<"The cell parameters are: "<<std::endl;
 	std::cout<<"n_1_c : "<< n_1_c<<" n_2_c : "<<n_2_c<<" n_3_c is : "<<n_3_c<<std::endl;
@@ -216,11 +218,30 @@ void ProblemFormulate::calcCellCoords(const size_t& n, std::array<size_t,3>& tmp
 	tmpArr[2] = n/(n_1_c*n_2_c);
 	tmpArr[1] = (n%(n_1_c*n_2_c))/n_1_c; 
 	tmpArr[0] = (n%(n_1_c*n_2_c))%n_1_c;
-		
+	
+
+	if(tmpArr[0]>=n_1_c)
+	{
+	std::cout<<"Before Update, n1 exceeds limit. The value of n is "<<n<<" The value of n1 is "<<tmpArr[0]<<std::endl;
+	exit(EXIT_FAILURE);
+	}	
+	if(tmpArr[1]>=n_2_c)
+	{
+	std::cout<<"Before Update, n2 exceeds limit. The value of n is "<<n<<" The value of n2 is "<<tmpArr[1]<<std::endl;
+	exit(EXIT_FAILURE);
+	}
+	if(tmpArr[2]>=n_3_c)
+	{
+	std::cout<<"Before Update, n3 exceeds limit. The value of n is "<<n<<" The value of n3 is "<<tmpArr[2]<<std::endl;
+	exit(EXIT_FAILURE);
+	}
+
+
+	/*	
 	assert(tmpArr[0]<n_1_c && tmpArr[0]>=0);	
 	assert(tmpArr[1]<n_2_c && tmpArr[1]>=0);
 	assert(tmpArr[2]<n_3_c && tmpArr[2]>=0);
-	
+	*/
 }
 
 /*
@@ -232,8 +253,13 @@ size_t ProblemFormulate::determineParticleLoc(const size_t& k)
 	size_t n1,n2,n3;	
 	x = molecules_[k].x_[0];	y = molecules_[k].x_[1];	z = molecules_[k].x_[2];
 
-//determining the coordinates of the cell in which the particle lies		
-		n1 = (x-x_min)/r_1_c;		n2 = (y-y_min)/r_2_c;		n3 = (z-z_min)/r_3_c;
+//determining the coordinates of the cell in which the particle lies
+/*		
+		assert(x>=x_min);	assert(y>=y_min);	assert(z>=z_min); 
+		assert(x<=x_max);	assert(y<=y_max);	assert(z<=z_max);
+*/
+		n1 = (fabs(x-x_min))/r_1_c;		n2 = fabs((y-y_min))/r_2_c;		n3 = fabs((z-z_min))/r_3_c;
+
 		if(x==x_max)
 			n1 = n_1_c-1; //correction required if particle is on the end boundary
 		if(y==y_max)
@@ -241,20 +267,293 @@ size_t ProblemFormulate::determineParticleLoc(const size_t& k)
 		if(z==z_max)
 			n3 = n_3_c-1;
 
+/*
 		assert(n1<n_1_c);
 		assert(n2<n_2_c);
 		assert(n3<n_3_c);
 				
+*/
+
+
 /*
 		assert(n1<n_1_c && n1>=0);
 		assert(n2<n_2_c && n2>=0);
 		assert(n3<n_3_c && n3>=0);
 */		
 
+
 //calculating and returning the position of the cell in the cells_ vector
 		return (calcCellPos(n1,n2,n3));
 }
 
+
+
+
+
+/*
+This function calculates and updates the position vector for all the particle
+*/
+void ProblemFormulate::updatePosition()
+{
+	const size_t N = molecules_.size();
+	size_t oldLoc, newLoc;
+	real x;		
+	real y;
+	real z;
+	std::array<size_t,3> oldCellCords, newCellCords;
+	for(size_t i =0; i<N; ++i)
+	{
+// determing the old location of this particle	
+		
+		x = molecules_[i].x_[0];	
+		y = molecules_[i].x_[1];	
+		z = molecules_[i].x_[2];
+		
+		if(x<x_min)
+		{
+			std::cout<<"Before position update, x is less than x_min for particle "<<i<<" The value of x is "<<x<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		if(y<y_min)
+		{
+			std::cout<<"Before position update, y is less than y_min for particle "<<i<<" The value of y is "<<y<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		if(z<z_min)
+		{
+			std::cout<<"Before position update, z is less than z_min for particle "<<i<<" The value of z is "<<z<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+						
+		oldLoc = determineParticleLoc(i);
+
+//determining the coordinates of this cell and asserting
+		calcCellCoords(oldLoc, oldCellCords);
+		if (oldCellCords[0]>=n_1_c)
+		{		
+			std::cout<<"Before Update, n1 exceeds limit for particle "<<i<<" The value of n is "<<oldLoc<<" The value of n1 is "<<oldCellCords[0]<<std::endl;
+			exit(EXIT_FAILURE);		
+		}		
+		if(oldCellCords[1]>=n_2_c)
+		{		
+			std::cout<<"Before Update, n2 exceeds limit for particle "<<i<<" The value of n is "<<oldLoc<<" The value of n2 is "<<oldCellCords[1]<<std::endl;
+			exit(EXIT_FAILURE);		
+		}		
+		if(oldCellCords[2]>=n_3_c)
+		{		
+			std::cout<<"Before Update, n3 exceeds limit for particle "<<i<<" The value of n is "<<oldLoc<<" The value of n3 is "<<oldCellCords[2]<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+//updating the position of particle i
+		for(size_t k =0; k<3; ++k)
+		{
+			molecules_[i].x_[k] += (delta_t*molecules_[i].v_[k]) + (0.5*(molecules_[i].f_[k])*delta_t*delta_t/(molecules_[i].m_));
+		}
+		
+		x = molecules_[i].x_[0];	
+		y = molecules_[i].x_[1];	
+		z = molecules_[i].x_[2];
+		
+		if(x<x_min)
+		{
+			std::cout<<"After position update, x is less than x_min for particle "<<i<<" The value of x is "<<x<<std::endl;
+		}
+	
+
+
+//Position update for particle i completed, time to apply periodic BC
+		applyPeriodicBC(i);
+
+// determing the new location of this particle	
+		newLoc = determineParticleLoc(i);
+
+		x = molecules_[i].x_[0];	
+		y = molecules_[i].x_[1];	
+		z = molecules_[i].x_[2];
+		
+		if(x<x_min)
+		{
+			std::cout<<"After applying Periodic BC, x is less than x_min for particle "<<i<<" The value of x is "<<x<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		if(x>x_max)
+		{
+			std::cout<<"After applying Periodic BC, x is greater than x_max for particle "<<i<<" The value of x is "<<x<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		if(y<y_min)
+		{
+			std::cout<<"After applying Periodic BC, y is less than y_min for particle "<<i<<" The value of y is "<<y<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		
+
+		if(y>y_max)
+		{
+			std::cout<<"After applying Periodic BC, y is greater than y_max for particle "<<i<<" The value of y is "<<y<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		if(z<z_min)
+		{
+			std::cout<<"After applying Periodic BC, z is less than z_min for particle "<<i<<" The value of z is "<<z<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if(z>z_max)
+		{
+			std::cout<<"After applying Periodic BC, z is greater than z_max for particle "<<i<<" The value of z is "<<z<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+/*
+		assert(x>=x_min);	
+		assert(y>=y_min);	
+		assert(z>=z_min); 
+		assert(x<=x_max);	
+		assert(y<=y_max);	
+		assert(z<=z_max);
+*/
+
+
+//determining the coordinates of this cell and asserting
+		calcCellCoords(newLoc, newCellCords);
+		if(newCellCords[0]>=n_1_c)
+		{
+			std::cout<<"After applying Periodic BC, n1 exceeded limit for particle "<<i<<" The value of n is "<<newLoc<<" The value of n1 is "<<newCellCords[0]<<std::endl;
+			exit(EXIT_FAILURE);
+		}		
+		if(newCellCords[1]>=n_2_c)
+		{		
+			std::cout<<"After applying Periodic BC, n2 exceeded limit for particle "<<i<<" The value of n is "<<newLoc<<" The value of n2 is "<<newCellCords[1]<<std::endl;
+			exit(EXIT_FAILURE);
+		}
+		if(newCellCords[2]>=n_3_c)
+		{
+			std::cout<<"After applying Periodic BC, n3 exceeded limit for particle "<<i<<" The value of n is "<<oldLoc<<" The value of n3 is "<<oldCellCords[2]<<std::endl;
+			exit(EXIT_FAILURE);	
+		}	
+
+//checking if this particle has migrated and updating cells_ accordingly
+		updateCells(i, oldLoc, newLoc);
+	}
+}
+
+/*
+This function takes the locations of particle-k before and after position update and updates the cells_ data strusture if the particle migrates from one cell to another
+*/
+void ProblemFormulate::updateCells(const size_t& k, const size_t& old_, const size_t& new_)
+{
+	if(new_ !=old_)
+		{
+			cells_[old_].remove(k);
+			cells_[new_].push_back(k);
+
+		}
+
+}
+
+/*
+This function is for copying the forces f_ into the old forces vector fOld_
+*/
+void ProblemFormulate::saveOldForce()
+{
+	const size_t N = molecules_.size();
+
+	for(size_t i =0; i<N; ++i)
+	{
+		for(size_t k =0; k<3; ++k)
+			molecules_[i].fOld_[k] = molecules_[i].f_[k];	
+	}
+}
+
+/*
+This function is used to reset the force vector f_ to 0 after each iteration
+*/
+void ProblemFormulate::resetForces()
+{
+	const size_t N = molecules_.size();
+
+	for(size_t i =0; i<N; ++i)
+	{
+		for(size_t k =0; k<3; ++k)
+			molecules_[i].f_[k] = 0.0;	
+	}
+	
+
+}
+
+
+/*
+This function calculates and updates the velocity vector for all the particle
+*/
+void ProblemFormulate::updateVelocity()
+{
+	const size_t N = molecules_.size();
+
+	for(size_t i =0; i<N; ++i)
+	{
+		for(size_t k =0; k<3; ++k)
+		{
+			molecules_[i].v_[k] += 0.5*delta_t*(molecules_[i].f_[k] + molecules_[i].fOld_[k])/molecules_[i].m_;
+		}
+		
+	}
+}
+
+/*
+This function returns the distance between particles i and j
+*/
+real ProblemFormulate::calcDistance(const size_t& i, const size_t& j)
+{
+	real diff = 0.0, r =0.0;	
+	
+	for(size_t k=0;k<3; ++k)
+	{
+		diff += pow((molecules_[i].x_[k] - molecules_[j].x_[k]),2);
+	}
+	assert(diff>0);
+ 	r = std::sqrt(diff);
+	
+	return r;
+}
+
+/*
+This function applies periodic Boundary Condition to particle i, once its position has been updated
+*/
+void ProblemFormulate::applyPeriodicBC(const size_t& i)
+{
+	
+	if(molecules_[i].x_[0]<x_min)
+	{
+		//std::cout<<"While applying Periodic BC, x is less than x_min for particle "<<i<<" The value of x is "<<molecules_[i].x_[0]<<std::endl;	
+		molecules_[i].x_[0] = x_max;
+		//std::cout<<"x has been updated to "<<molecules_[i].x_[0]<<std::endl;
+	}
+
+	if(molecules_[i].x_[0]>x_max)
+		molecules_[i].x_[0] = x_min;
+	
+
+	if(molecules_[i].x_[1]<y_min)
+		molecules_[i].x_[1] = y_max;
+
+	if(molecules_[i].x_[1]>y_max)
+		molecules_[i].x_[1] = y_min;
+		
+	if(molecules_[i].x_[2]<z_min)
+	{
+		//std::cout<<"While applying Periodic BC, z is less than z_min for particle "<<i<<" The value of z is "<<molecules_[i].x_[2]<<std::endl;	
+		molecules_[i].x_[2] = z_max;
+		//std::cout<<"z has been updated to "<<molecules_[i].x_[2]<<std::endl;
+	}
+
+	if(molecules_[i].x_[2]>z_max)
+		molecules_[i].x_[2] = z_min;
+}
 
 
 
@@ -410,141 +709,6 @@ void ProblemFormulate::determineNeighbourSet(const size_t& i, std::vector<size_t
 	tmp_n = calcCellPos(tmp_c_x, tmp_c_y, tmp_c_z);
 	NSet.push_back(tmp_n);
 }
-
-
-/*
-This function calculates and updates the position vector for all the particle
-*/
-void ProblemFormulate::updatePosition()
-{
-	const size_t N = molecules_.size();
-	size_t oldLoc, newLoc;
-	for(size_t i =0; i<N; ++i)
-	{
-// determing the old location of this particle	
-		oldLoc = determineParticleLoc(i);
-
-//updating the position of particle i
-		for(size_t k =0; k<3; ++k)
-		{
-			molecules_[i].x_[k] += (delta_t*molecules_[i].v_[k]) + (0.5*(molecules_[i].f_[k])*delta_t*delta_t/(molecules_[i].m_));
-		}
-
-//Position update for particle i completed, time to apply periodic BC
-		applyPeriodicBC(i);
-
-// determing the new location of this particle	
-		newLoc = determineParticleLoc(i);
-
-//checking if this particle has migrated and updating cells_ accordingly
-		updateCells(i, oldLoc, newLoc);
-	}
-}
-
-/*
-This function takes the locations of particle-k before and after position update and updates the cells_ data strusture if the particle migrates from one cell to another
-*/
-void ProblemFormulate::updateCells(const size_t& k, const size_t& old_, const size_t& new_)
-{
-	if(new_ !=old_)
-		{
-			cells_[old_].remove(k);
-			cells_[new_].push_back(k);
-
-		}
-
-}
-
-/*
-This function is for copying the forces f_ into the old forces vector fOld_
-*/
-void ProblemFormulate::saveOldForce()
-{
-	const size_t N = molecules_.size();
-
-	for(size_t i =0; i<N; ++i)
-	{
-		for(size_t k =0; k<3; ++k)
-			molecules_[i].fOld_[k] = molecules_[i].f_[k];	
-	}
-}
-
-/*
-This function is used to reset the force vector f_ to 0 after each iteration
-*/
-void ProblemFormulate::resetForces()
-{
-	const size_t N = molecules_.size();
-
-	for(size_t i =0; i<N; ++i)
-	{
-		for(size_t k =0; k<3; ++k)
-			molecules_[i].f_[k] = 0.0;	
-	}
-	
-
-}
-
-
-/*
-This function calculates and updates the velocity vector for all the particle
-*/
-void ProblemFormulate::updateVelocity()
-{
-	const size_t N = molecules_.size();
-
-	for(size_t i =0; i<N; ++i)
-	{
-		for(size_t k =0; k<3; ++k)
-		{
-			molecules_[i].v_[k] += 0.5*delta_t*(molecules_[i].f_[k] + molecules_[i].fOld_[k])/molecules_[i].m_;
-		}
-		
-	}
-}
-
-/*
-This function returns the distance between particles i and j
-*/
-real ProblemFormulate::calcDistance(const size_t& i, const size_t& j)
-{
-	real diff = 0.0;	
-
-	for(size_t k=0;k<3; ++k)
-	{
-		diff += pow((molecules_[i].x_[k] - molecules_[j].x_[k]),2);
-	}
- 
-	return (std::sqrt(diff));
-}
-
-/*
-This function applies periodic Boundary Condition to particle i, once its position has been updated
-*/
-void ProblemFormulate::applyPeriodicBC(const size_t& i)
-{
-	real x = molecules_[i].x_[0];	real y = molecules_[i].x_[1];	real z = molecules_[i].x_[2];
-
-	if(x<x_min)
-		x = x_max;
-
-	if(x>x_max)
-		x = x_min;
-	
-	if(y<y_min)
-		y = y_max;
-
-	if(y>y_max)
-		y = y_min;
-		
-	if(z<z_min)
-		z = z_max;
-
-	if(z>z_max)
-		z = z_min;
-}
-
-
 
 
 /*
