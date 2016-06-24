@@ -1,1 +1,0 @@
-Use the VTK files to verify your results.
