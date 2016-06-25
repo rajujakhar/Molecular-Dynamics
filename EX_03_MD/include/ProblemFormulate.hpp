@@ -14,6 +14,7 @@
 class ProblemFormulate
 {
 	public:
+		ProblemFormulate(const std::string&);// constructor to read the simulation parameters
 		void readDataInputFile(const std::string&);// to read the particle input data
      		void simulateMD();// to drive the molecular dynamics simulation
 		void updateForce();// to update the force vector for each particle
@@ -41,41 +42,40 @@ class ProblemFormulate
 		size_t n_1_c, n_2_c, n_3_c; // number of cells in each of the 3-directions (-x, -y, -z)
 		size_t n_tot_c; //total numbe rof cells (= n_1_c* n_2_c* n_3_c)
 		real r_1_c, r_2_c, r_3_c; // modified values of r_cut in each of the 3-directions
-		
 
 
+		std::string name;
+		size_t vis_space;
+		real t_start;
+		real t_end; 
+		real delta_t;
+		real x_min;
+		real y_min;
+		real z_min;
+		real x_max;
+		real y_max;
+		real z_max;
+		real r_cut;
+		real e;
+		real s;
 		
+/*		
 		std::string name = "blocks";
 		size_t vis_space = 1600;
 		real t_start = 0.0;
 		real t_end = 8.0; 
 		real delta_t = 0.00005;
-		real x_min = 78.0;
-		real y_min = 95.0;
-		real z_min = 75.0;
-		real x_max = 147.0;
-		real y_max = 105.0;
-		real z_max = 126.0;//224.4924;
-		real r_cut = 2.5;
-		real e = 5.0; //tmp variable for epsilon
-		real s = 1.0; // tmp variable for sigma
-  	
-	/*
-		std::string name = "mini";
-		size_t vis_space = 1;
-		real t_start = 0.0; 
-		real t_end = 0.001; 
-		real delta_t = 0.0001;
 		real x_min = 0.0;
 		real y_min = 0.0;
 		real z_min = 0.0;
-		real x_max = 200;
-		real y_max = 200;
-		real z_max = 200;
+		real x_max = 224.4924;
+		real y_max = 224.4924;
+		real z_max = 224.4924;
 		real r_cut = 2.5;
-		real e = 5.0e-5; //tmp variable for epsilon
-		real s = 1.0;// tmp variable for sigma
-	*/
+		real e = 5.0; //tmp variable for epsilon
+		real s = 1.0; // tmp variable for sigma
+*/  
+
 	
 };
 

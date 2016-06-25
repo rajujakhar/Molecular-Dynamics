@@ -8,6 +8,36 @@
 #include<cmath>	 //pow(x,n)
 #include<assert.h>
 
+/*
+ The construcor which sets the parameter variables
+ */
+ProblemFormulate::ProblemFormulate(const std::string& filename)
+{
+    ParameterReader param;
+    param.readParameters(filename);
+    param.getParameter(std::string("name"), name);
+    param.getParameter(std::string("vis_space"), vis_space);
+    param.getParameter(std::string("t_start"), t_start);
+    param.getParameter(std::string("t_end"), t_end);
+    param.getParameter(std::string("delta_t"), delta_t);
+    param.getParameter(std::string("x_min"),x_min );
+    param.getParameter(std::string("y_min"),y_min );
+    param.getParameter(std::string("z_min"),z_min );
+    param.getParameter(std::string("x_max"),x_max );
+    param.getParameter(std::string("y_max"),y_max );
+    param.getParameter(std::string("z_max"),z_max );
+	param.getParameter(std::string("r_cut"),r_cut );
+    param.getParameter(std::string("epsilon"),e );
+    param.getParameter(std::string("sigma"), s);
+
+    std::cout << "name is: " << name << std::endl;
+  
+
+	
+    std::cout << "sigma: " << s << std::endl;
+}
+
+
 
 /*
 This function takes the filename as an arguemeent and reads the input from the file and intializes the molecules_ data structure
@@ -168,15 +198,27 @@ void ProblemFormulate::setUpLinkedCells()
 	const real l1 = fabs(x_max-x_min);
 	const real l2 = fabs(y_max-y_min);
 	const real l3 = fabs(z_max-z_min);
+	
+	std::cout << "x_min: " << x_min << std::endl;
+	std::cout << "x_max: " << x_max << std::endl;
+	
+    std::cout << "y_min: " << y_min << std::endl;
+	std::cout << "y_max: " << y_max << std::endl;
+	
+    std::cout << "z_min: " << z_min << std::endl;
+	std::cout << "z_max: " << z_max << std::endl;
 
 	n_1_c = l1/r_cut;	n_2_c = l2/r_cut;	n_3_c = l3/r_cut;		
 	r_1_c = l1/n_1_c;	r_2_c = l2/n_2_c;	r_3_c = l3/n_3_c;
 
-	assert(n_1_c>0);	assert(n_2_c>0);	assert(n_3_c>0);
+
 
 	std::cout<<"The cell parameters are: "<<std::endl;
+	std::cout<<"l1 : "<< l1<<" l2 : "<<l2<<" l3 is : "<<l3<<std::endl;
 	std::cout<<"n_1_c : "<< n_1_c<<" n_2_c : "<<n_2_c<<" n_3_c is : "<<n_3_c<<std::endl;
 	std::cout<<"r_1_c : "<< r_1_c<<" r_2_c : "<<r_2_c<<" r_3_c is : "<<r_3_c<<std::endl;
+
+		assert(n_1_c>0);	assert(n_2_c>0);	assert(n_3_c>0);
 
 //Now resizing the cells_ data structure
 	n_tot_c  = n_1_c * n_2_c * n_3_c;

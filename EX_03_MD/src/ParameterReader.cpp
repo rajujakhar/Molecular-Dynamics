@@ -1,23 +1,8 @@
 #include "ParameterReader.hpp"
 
-ParameterReader::ParameterReader()
 //fill the keys_ of the Parameter
+ParameterReader::ParameterReader()
 {
-	/*ParameterReader::keys_.push_back("name");
-	ParameterReader::keys_.push_back("vis_space");
-	ParameterReader::keys_.push_back("t_start");
-	ParameterReader::keys_.push_back("t_end");
-	ParameterReader::keys_.push_back("delta_t");
-	ParameterReader::keys_.push_back("x_min");
-	ParameterReader::keys_.push_back("y_min");
-	ParameterReader::keys_.push_back("z_min");
-	ParameterReader::keys_.push_back("x_max");
-	ParameterReader::keys_.push_back("y_max");
-	ParameterReader::keys_.push_back("z_max");
-	ParameterReader::keys_.push_back("r_cut");
-	ParameterReader::keys_.push_back("epsilon");
-	ParameterReader::keys_.push_back("sigma");*/
-
 	keys_.push_back("name");
 	keys_.push_back("vis_space");
 	keys_.push_back("t_start");
@@ -34,58 +19,73 @@ ParameterReader::ParameterReader()
 	keys_.push_back("sigma");
 }
 
+//Check is the given key is defind in the existing database
 bool ParameterReader::isDefined(const std::string &key)
 {
-    std::cout << "Size of keys_" << keys_.size() << std::endl;
     auto iter = std::find(keys_.begin(), keys_.end(), key);
 
     if(iter== keys_.end())
     {	
-    	std::cout << "Key not found\n";
+        std::cout << "Key " << key << "is not valid\n";
         return 0;    //key not found
     }
     else
         return 1;    // key found
 }
 
+// This function removes the whitespace of str in the front and back
+std::string ParameterReader::trim(std::string& str)
+{
+    size_t first = str.find_first_not_of(' ');
+    if (first == std::string::npos)
+        return "";
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last-first+1));
+}
+
+// Read input parameters from file
 void ParameterReader::readParameters(const std::string &file)
 {
     std::string line, key, val;
     char delim = ' ';
     std::ifstream input_file(file);
 
-    //input_file.open(file);  //open the file for reading
-    //std::cout << "File opened\n";
     assert(input_file.fail() == 0);
-    //std::cout << "File opened\n";
-
-    getline(input_file, line);
-    std::cout << line << std::endl;
 
     while(getline(input_file, line))
     {
-    	//std::cout <<"While loop\n";
-        
-        std::stringstream ss(line);              //create a string stream
+
+        std::istringstream ss(line);              //create a input string stream
 
         getline(ss, key, delim);       // find key
-        getline(ss, val);       // find val
+        getline(ss, val);             // find val
+        val = trim(val);
 
-        std::cout << "key is: " << key << std::endl;
-        std::cout << "Value is: " << val << std::endl;
-       	//std::cout << "In while\n"; 	
-        /*if(isDefined(key))
+        if(isDefined(key))
         {
-            globalMap_.insert(std::pair<std::string, double> ("key",
-std::stod(val)));
-            std::cout << "Data inserted\n";
-        }*/
+            globalMap_.insert(std::pair<std::string, std::string> (key,val));
+        }
+
     }
-
-    input_file.close();
-
-
+     input_file.close();
 }
+
+//Overloaded function getParameter
+void ParameterReader::getParameter(const std::string &key, double &value)
+{
+    value = std::stod(globalMap_[key]);
+}
+
+void ParameterReader::getParameter(const std::string &key, std::string &value)
+{
+    value = globalMap_[key];
+}
+
+void ParameterReader::getParameter(const std::string &key, size_t &value)
+{
+    value = std::stoi(globalMap_[key]);
+}
+
 
 void ParameterReader::displayMap()
 {
@@ -96,30 +96,8 @@ void ParameterReader::displayMap()
         std::cout << iter->first << "\t" << iter->second << std::endl;
     }
 
-    std::cout << "Done Displaying\n";
 }
 
 
 
 
-void ParameterReader::setParams()
-{
-/*
-	std::string ParameterReader::name = "blocks";
-	size_t ParameterReader::vis_space =  1600;
-	t_start = 0.0;
-	t_end = 8.0;
-	delta_t = 0.00005;
-	x_min = 0.0;
-	y_min = 0.0;
-	z_min = 0.0;
-	x_max = 224.4924;
-	y_max = 224.4924;
-	z_max = 224.4924;
-	r_cut = 2.5;
-	epsilon = 5.0;
-	sigma = 1.0;
-*/
-	std::cout<<"Displaying the Params"<<std::endl;	
-	
-}

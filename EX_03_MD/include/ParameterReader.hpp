@@ -1,53 +1,60 @@
 #ifndef PARAM_READER_HPP
 #define PARAM_READER_HPP
 
-#include"Type.hpp"
-
-#include <cstddef> // for size_t
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>  //std::ifstream
+#include <fstream>   //std::ifstream
 #include <sstream>
 #include <map>
-#include <algorithm> //find
+#include <algorithm>    //find
 #include <assert.h>
-//#include <utility>
+//#include <type_traits>   // std::is_same
 
 class ParameterReader
 {
-public :
-    
+private:
+    std::vector<std::string> keys_;
+    std::map<std::string, std::string> globalMap_;
 
-	ParameterReader();
-	void readParameters(const std::string& filename);
-	inline bool isDefined(const std::string& key);
-	void displayMap();
-	//template<typename Type>
-	//inline void getParameter(const std::string& key, double &value) const;
+public:
+    ParameterReader();
+    void readParameters(const std::string&);
+    inline bool isDefined(const std::string&);
+    void displayMap();
+    std::string trim(std::string&);
 
-	void setParams();
+    void getParameter(const std::string&, std::string& );
+    void getParameter(const std::string&, double& );
+    void getParameter(const std::string&, size_t& );
+    //template<typename Type>
+    //void getParameter(const std::string& key, Type& value);
+    //void getParameter(const std::string&, std::string& );
 
-	//private:
-		std::vector<std::string> keys_;
-		std::map<std::string, double> globalMap_;
-		
-		/*
-		const static std::string name = "blocks";
-		const static size_t vis_space = 1600;
-		const static real t_start = 0.0;
-		const static real t_end = 8.0;
-		const static real delta_t = 0.00005;
-		const static real x_min = 0.0;
-		const static real y_min = 0.0;
-		const static real z_min = 0.0;
-		const static real x_max = 224.4924;
-		const static real y_max = 224.4924;
-		const static real z_max = 224.4924;
-		const static real r_cut = 2.5;
-		const static real epsilon = 5.0;
-		const static real sigma = 1.0;
-		*/
+   /*template<typename Type>
+    void getParameter(const std::string& key, Type& value);
+    {
+        if (std::is_same<Type, double>::value)
+        {
+            std::cout << "Type is double\n";
+            value = std::stod(globalMap_[key]);
+        }
+        else if(std::is_same<Type, std::string>::value)
+        {
+            std::cout << "Type is string\n";
+           value = globalMap_[key];
+            //value = "blocks";
+        }
+
+    }*/
 
 };
+
+
+/*template<typename Type>
+void ParameterReader::getParameter(const std::string& key, Type& value)
+{
+    value = globalMap_[key];
+}*/
+
 #endif

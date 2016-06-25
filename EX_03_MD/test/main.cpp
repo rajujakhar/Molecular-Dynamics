@@ -1,7 +1,6 @@
 #include<iostream>
 #include<string>
 
-//#include "ParameterReader.hpp"
 #include "ProblemFormulate.hpp"
 
 int main(int argc, char*argv[])
@@ -16,19 +15,10 @@ int main(int argc, char*argv[])
 	std::cout<<"The params file is "<<paramsFileName<<std::endl;
 	std::cout<<"The data file is "<<dataFileName<<std::endl;
 
-	/*
-	ParameterReader param;
-	param.readParameters(std::string("blocks.par"));
-	param.displayMap();
-	param.setParams();
-	*/
-
-	ProblemFormulate MDsim;
-	
+	ProblemFormulate MDsim(paramsFileName);
 	MDsim.readDataInputFile(dataFileName);
 	MDsim.simulateMD();
 	
-
 	return 0;	
 
 
